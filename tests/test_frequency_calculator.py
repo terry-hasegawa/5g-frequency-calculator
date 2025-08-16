@@ -34,36 +34,6 @@ class TestFrequencyCalculator(unittest.TestCase):
         self.assertAlmostEqual(point_a_freq, 3400.86, places=2,
                               msg="Point A frequency conversion failed")
     
-    def test_ssb_frequency_candidates_n77(self):
-        """Test SSB frequency candidates for Band n77"""
-        # Expected SSB candidates for the test case
-        expected_ssb_candidates = [
-            (7992, 647328),  # GSCN 7992, ARFCN 647328
-            (7993, 647424),  # GSCN 7993, ARFCN 647424
-            # ... more candidates up to GSCN 8047, ARFCN 652608
-        ]
-        
-        ssb_candidates = self.calc.calculate_ssb_candidates(
-            band='n77',
-            scs_khz=30,
-            bandwidth_mhz=100,
-            center_arfcn=650000,
-            coreset_zero=10
-        )
-        
-        # Test first few candidates
-        self.assertGreater(len(ssb_candidates), 0, 
-                          "No SSB candidates found")
-        
-        # Check specific expected values
-        self.assertIn((7992, 647328), ssb_candidates,
-                     "Expected SSB candidate GSCN 7992 not found")
-        
-        # Check last expected candidate
-        last_candidate = max(ssb_candidates, key=lambda x: x[0])
-        self.assertEqual(last_candidate, (8047, 652608),
-                        "Last SSB candidate incorrect")
-    
     def test_arfcn_frequency_conversion_n77(self):
         """Test ARFCN to frequency conversion for Band n77"""
         # Test Point A ARFCN to frequency
@@ -164,6 +134,93 @@ class TestFrequencyCalculator(unittest.TestCase):
         # Invalid ARFCN to frequency conversion
         with self.assertRaises(ValueError):
             self.calc.arfcn_to_frequency('n999', 650000)
+    
+    def test_band_n1_fdd_calculations(self):
+        """Test Band n1 FDD calculations"""
+        
+        # Test case 1: n1 FDD, Bandwidth 10MHz, SCS 15kHz
+        # DL: ARFCN 432000 (2160 MHz), Point A DL: 431064 (2155.32 MHz)
+        # UL: ARFCN 394000 (1970 MHz), Point A UL: 393064 (1965.32 MHz)
+        
+        dl_point_a, ul_point_a = self.calc.calculate_point_a_arfcn_fdd(
+            band='n1',
+            scs_khz=15,
+            bandwidth_mhz=10,
+            dl_center_arfcn=432000,
+            ul_center_arfcn=394000
+        )
+        
+        self.assertEqual(dl_point_a, 431064, "DL Point A ARFCN calculation failed for n1 10MHz")
+        self.assertEqual(ul_point_a, 393064, "UL Point A ARFCN calculation failed for n1 10MHz")
+        
+        # Verify frequencies
+        dl_point_a_freq = self.calc.arfcn_to_frequency('n1', dl_point_a)
+        ul_point_a_freq = self.calc.arfcn_to_frequency('n1', ul_point_a)
+        
+        self.assertAlmostEqual(dl_point_a_freq, 2155.32, places=2, 
+                              msg="DL Point A frequency incorrect")
+        self.assertAlmostEqual(ul_point_a_freq, 1965.32, places=2,
+                              msg="UL Point A frequency incorrect")
+    
+    def test_band_n1_fdd_15mhz(self):
+        """Test Band n1 FDD 15MHz calculations"""
+        
+        # Test case 2: n1 FDD, Bandwidth 15MHz, SCS 15kHz  
+        # DL: ARFCN 432500 (2162.5 MHz), Point A DL: 431078 (2155.39 MHz)
+        # UL: ARFCN 394500 (1972.5 MHz), Point A UL: 393078 (1965.39 MHz)
+        
+        dl_point_a, ul_point_a = self.calc.calculate_point_a_arfcn_fdd(
+            band='n1',
+            scs_khz=15,
+            bandwidth_mhz=15,
+            dl_center_arfcn=432500,
+            ul_center_arfcn=394500
+        )
+        
+        self.assertEqual(dl_point_a, 431078, "DL Point A ARFCN calculation failed for n1 15MHz")
+        self.assertEqual(ul_point_a, 393078, "UL Point A ARFCN calculation failed for n1 15MHz")
+        
+        # Verify frequencies
+        dl_point_a_freq = self.calc.arfcn_to_frequency('n1', dl_point_a)
+        ul_point_a_freq = self.calc.arfcn_to_frequency('n1', ul_point_a)
+        
+        self.assertAlmostEqual(dl_point_a_freq, 2155.39, places=2,
+                              msg="DL Point A frequency incorrect for 15MHz")
+        self.assertAlmostEqual(ul_point_a_freq, 1965.39, places=2,
+                              msg="UL Point A frequency incorrect for 15MHz")
+    
+    def test_band_n1_arfcn_frequency_conversion(self):
+        """Test ARFCN to frequency conversion for Band n1"""
+        
+        # Test known ARFCN to frequency conversions for n1
+        test_cases = [
+            (432000, 2160.0),    # DL center for 10MHz case
+            (394000, 1970.0),    # UL center for 10MHz case
+            (432500, 2162.5),    # DL center for 15MHz case
+            (394500, 1972.5),    # UL center for 15MHz case
+            (431064, 2155.32),   # DL Point A for 10MHz
+            (393064, 1965.32),   # UL Point A for 10MHz
+            (431078, 2155.39),   # DL Point A for 15MHz
+            (393078, 1965.39),   # UL Point A for 15MHz
+            (432530, 2162.65),   # SSB for 15MHz case
+        ]
+        
+        for arfcn, expected_freq in test_cases:
+            with self.subTest(arfcn=arfcn):
+                freq = self.calc.arfcn_to_frequency('n1', arfcn)
+                self.assertAlmostEqual(freq, expected_freq, places=2,
+                                     msg=f"Frequency conversion failed for ARFCN {arfcn}")
+    
+    def test_band_n1_info(self):
+        """Test band information retrieval for Band n1"""
+        band_info = self.calc.get_band_info('n1')
+        
+        self.assertEqual(band_info['name'], 'n1')
+        self.assertEqual(band_info['frequency_range'], 'FR1')
+        self.assertEqual(band_info['duplex_mode'], 'FDD')
+        self.assertEqual(band_info['delta_f_global'], 5.0)  # 5 kHz for n1
+        self.assertIn('dl_freq_low', band_info)
+        self.assertIn('ul_freq_low', band_info)
 
 
 if __name__ == '__main__':

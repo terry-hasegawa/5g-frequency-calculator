@@ -7,6 +7,22 @@ from typing import Dict, Any
 
 # 3GPP TS 38.104 Table 5.4.2.1-1: NR operating bands
 NR_BANDS = {
+    'n1': {
+        'name': 'n1',
+        'frequency_range': 'FR1',
+        'duplex_mode': 'FDD',
+        'dl_freq_low': 2110.0,      # MHz
+        'dl_freq_high': 2170.0,     # MHz
+        'ul_freq_low': 1920.0,      # MHz  
+        'ul_freq_high': 1980.0,     # MHz
+        'arfcn_offset': 0,          # N_REF_Offs (0 for frequency range 0-3000 MHz)
+        'ul_arfcn_offset': 0,       # N_REF_Offs for UL (same as DL for n1)
+        'freq_ref_offset': 0.0,     # F_REF_Offs (0 MHz for frequency range 0-3000 MHz)
+        'delta_f_global': 5.0,      # kHz (5 kHz for frequency range 0-3000 MHz)
+        'delta_f_raster': 100.0,    # kHz (100 kHz raster from table)
+        'supported_scs': [15, 30],  # kHz
+        'supported_bandwidths': [5, 10, 15, 20, 25, 30, 40, 50],  # MHz
+    },
     'n77': {
         'name': 'n77',
         'frequency_range': 'FR1',
@@ -143,6 +159,9 @@ def get_max_rb(scs_khz: int, bandwidth_mhz: int) -> int:
         raise ValueError(f"Unsupported bandwidth {bandwidth_mhz} MHz for SCS {scs_khz} kHz")
     
     return MAX_RB_TABLE[scs_khz][bandwidth_mhz]
+
+
+def is_valid_bandwidth(band: str, bandwidth_mhz: int) -> bool:
     """
     Check if bandwidth is valid for given band
     
