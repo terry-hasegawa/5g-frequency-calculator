@@ -1,169 +1,136 @@
 """
-Unit tests for 5G NR frequency calculator
+5G NR Frequency Calculator
 Based on 3GPP TS 38.104 Release 16
 """
 
-import unittest
-from src.frequency_calculator import FrequencyCalculator
+from typing import List, Tuple, Dict, Any
+from .band_data import get_band_info, is_valid_scs, is_valid_bandwidth, get_max_rb
 
 
-class TestFrequencyCalculator(unittest.TestCase):
-    """Test cases for 5G NR frequency calculations"""
+class FrequencyCalculator:
+    """
+    Calculator for 5G NR Point A and SSB frequencies
+    Based on 3GPP TS 38.104 Release 16
+    """
     
-    def setUp(self):
-        """Set up test fixtures before each test method."""
-        self.calc = FrequencyCalculator()
+    def __init__(self):
+        """Initialize the frequency calculator"""
+        pass
     
-    def test_point_a_calculation_n77(self):
-        """Test Point A calculation for Band n77"""
-        # Test case: Band n77, SCS 30kHz, BW 100MHz, Center ARFCN 650000
-        # Expected Point A ARFCN: 646724 (3400.86 MHz)
+    def calculate_point_a_arfcn(self, band: str, scs_khz: int, bandwidth_mhz: int, 
+                               center_arfcn: int, coreset_zero: int = 0, 
+                               offset_to_carrier_rb: int = 0) -> int:
+        """
+        Calculate Point A ARFCN from carrier center ARFCN
+        Based on 3GPP TS 38.104 and TS 38.101-1
         
-        point_a_arfcn = self.calc.calculate_point_a_arfcn(
-            band='n77',
-            scs_khz=30,
-            bandwidth_mhz=100,
-            center_arfcn=650000
-        )
+        Method: Calculate via frequency domain
+        1. Convert center ARFCN to frequency
+        2. Calculate HalfGrid = (N_RB × 12 × Δf) / 2
+        3. Point A frequency = Center frequency - HalfGrid
+        4. Convert Point A frequency back to ARFCN
         
-        self.assertEqual(point_a_arfcn, 646724, 
-                        "Point A ARFCN calculation failed for Band n77")
-        
-        # Verify Point A frequency
-        point_a_freq = self.calc.arfcn_to_frequency('n77', point_a_arfcn)
-        self.assertAlmostEqual(point_a_freq, 3400.86, places=2,
-                              msg="Point A frequency conversion failed")
-    
-    def test_ssb_frequency_candidates_n77(self):
-        """Test SSB frequency candidates for Band n77"""
-        # Expected SSB candidates for the test case
-        expected_ssb_candidates = [
-            (7992, 647328),  # GSCN 7992, ARFCN 647328
-            (7993, 647424),  # GSCN 7993, ARFCN 647424
-            # ... more candidates up to GSCN 8047, ARFCN 652608
-        ]
-        
-        ssb_candidates = self.calc.calculate_ssb_candidates(
-            band='n77',
-            scs_khz=30,
-            bandwidth_mhz=100,
-            center_arfcn=650000,
-            coreset_zero=10
-        )
-        
-        # Test first few candidates
-        self.assertGreater(len(ssb_candidates), 0, 
-                          "No SSB candidates found")
-        
-        # Check specific expected values
-        self.assertIn((7992, 647328), ssb_candidates,
-                     "Expected SSB candidate GSCN 7992 not found")
-        
-        # Check last expected candidate
-        last_candidate = max(ssb_candidates, key=lambda x: x[0])
-        self.assertEqual(last_candidate, (8047, 652608),
-                        "Last SSB candidate incorrect")
-    
-    def test_arfcn_frequency_conversion_n77(self):
-        """Test ARFCN to frequency conversion for Band n77"""
-        # Test Point A ARFCN to frequency
-        freq = self.calc.arfcn_to_frequency('n77', 646724)
-        self.assertAlmostEqual(freq, 3400.86, places=2)
-        
-        # Test center ARFCN to frequency  
-        freq = self.calc.arfcn_to_frequency('n77', 650000)
-        self.assertAlmostEqual(freq, 3450.0, places=2)
-        
-        # Test some other known values
-        freq = self.calc.arfcn_to_frequency('n77', 620000)  # Reference point
-        self.assertAlmostEqual(freq, 3000.0, places=2)
-    
-    def test_point_a_calculation_multiple_cases(self):
-        """Test Point A calculation for multiple bandwidth and SCS combinations"""
-        
-        # Test cases for Band n77 with different configurations
-        test_cases = [
-            # (SCS, BW, Center_ARFCN, Expected_PointA_ARFCN)
-            (30, 100, 650000, 646724),  # Main test case
-            (30, 50, 650000, 648362),   # 50MHz bandwidth
-            (30, 20, 650000, 649638),   # 20MHz bandwidth  
-            (15, 20, 650000, 649638),   # 15kHz SCS
-        ]
-        
-        for scs_khz, bw_mhz, center_arfcn, expected_point_a in test_cases:
-            with self.subTest(scs=scs_khz, bw=bw_mhz, center=center_arfcn):
-                point_a_arfcn = self.calc.calculate_point_a_arfcn(
-                    band='n77',
-                    scs_khz=scs_khz,
-                    bandwidth_mhz=bw_mhz,
-                    center_arfcn=center_arfcn
-                )
-                
-                # Calculate expected based on formula
-                from src.band_data import get_max_rb
-                n_rb = get_max_rb(scs_khz, bw_mhz)
-                half_grid_khz = (n_rb * 12 * scs_khz) / 2
-                
-                center_freq = self.calc.arfcn_to_frequency('n77', center_arfcn)
-                expected_point_a_freq = center_freq - (half_grid_khz / 1000.0)
-                
-                # Verify the calculation
-                actual_point_a_freq = self.calc.arfcn_to_frequency('n77', point_a_arfcn)
-                self.assertAlmostEqual(actual_point_a_freq, expected_point_a_freq, places=2,
-                                     msg=f"Point A frequency mismatch for SCS={scs_khz}, BW={bw_mhz}")
-    
-    def test_point_a_edge_cases(self):
-        """Test Point A calculation edge cases"""
-        
-        # Test minimum bandwidth
-        point_a = self.calc.calculate_point_a_arfcn('n77', 30, 10, 650000)
-        self.assertIsInstance(point_a, int)
-        
-        # Test maximum bandwidth
-        point_a = self.calc.calculate_point_a_arfcn('n77', 30, 100, 650000)
-        self.assertIsInstance(point_a, int)
-        
-        # Test different SCS values
-        for scs in [15, 30, 60]:
-            if scs == 60:  # 60kHz SCS has limited bandwidth options
-                point_a = self.calc.calculate_point_a_arfcn('n77', scs, 30, 650000)
-            else:
-                point_a = self.calc.calculate_point_a_arfcn('n77', scs, 20, 650000)
-            self.assertIsInstance(point_a, int)
-    
-    def test_band_info_n77(self):
-        """Test band information retrieval for Band n77"""
-        band_info = self.calc.get_band_info('n77')
-        
-        self.assertEqual(band_info['name'], 'n77')
-        self.assertEqual(band_info['frequency_range'], 'FR1')
-        self.assertIn('dl_freq_low', band_info)
-        self.assertIn('dl_freq_high', band_info)
-        self.assertIn('arfcn_offset', band_info)
-    
-    def test_invalid_inputs(self):
-        """Test error handling for invalid inputs"""
-        # Invalid band
-        with self.assertRaises(ValueError):
-            self.calc.calculate_point_a_arfcn('n999', 30, 100, 650000)
-        
-        # Invalid SCS
-        with self.assertRaises(ValueError):
-            self.calc.calculate_point_a_arfcn('n77', 25, 100, 650000)
-        
-        # Invalid bandwidth
-        with self.assertRaises(ValueError):
-            self.calc.calculate_point_a_arfcn('n77', 30, 150, 650000)
-        
-        # Invalid bandwidth for specific SCS
-        with self.assertRaises(ValueError):
-            self.calc.calculate_point_a_arfcn('n77', 60, 5, 650000)  # 5MHz not supported for 60kHz SCS
+        Args:
+            band: 5G NR band (e.g., 'n77')
+            scs_khz: Subcarrier spacing in kHz (15, 30, 60, 120)
+            bandwidth_mhz: Channel bandwidth in MHz
+            center_arfcn: Center ARFCN of the carrier
+            coreset_zero: Control Resource Set Zero configuration (not used in this method)
+            offset_to_carrier_rb: offsetToCarrier in RB units (default: 0)
             
-        # Invalid ARFCN to frequency conversion
-        with self.assertRaises(ValueError):
-            self.calc.arfcn_to_frequency('n999', 650000)
-
-
-if __name__ == '__main__':
-    # Run specific test
-    unittest.main(verbosity=2)
+        Returns:
+            Point A ARFCN
+            
+        Raises:
+            ValueError: If invalid parameters provided
+        """
+        # Validate inputs
+        if not is_valid_scs(band, scs_khz):
+            raise ValueError(f"Invalid SCS {scs_khz} kHz for band {band}")
+        
+        if not is_valid_bandwidth(band, bandwidth_mhz):
+            raise ValueError(f"Invalid bandwidth {bandwidth_mhz} MHz for band {band}")
+        
+        # Get band information
+        band_info = get_band_info(band)
+        
+        # Step 1: Convert center ARFCN to frequency (MHz)
+        center_freq_mhz = self.arfcn_to_frequency(band, center_arfcn)
+        
+        # Step 2: Get maximum RB number and calculate HalfGrid
+        n_rb = get_max_rb(scs_khz, bandwidth_mhz)
+        half_grid_khz = (n_rb * 12 * scs_khz) / 2
+        
+        # Step 3: Calculate Point A frequency
+        point_a_freq_mhz = center_freq_mhz - (half_grid_khz / 1000.0)  # Convert kHz to MHz
+        
+        # Step 4: Convert Point A frequency back to ARFCN
+        # Using inverse of ARFCN to frequency formula
+        freq_ref_offset = band_info['freq_ref_offset']  # MHz
+        delta_f_global = band_info['delta_f_global']    # kHz
+        arfcn_offset = band_info['arfcn_offset']        # N_REF_Offs
+        
+        point_a_arfcn = round((point_a_freq_mhz - freq_ref_offset) * 1000 / delta_f_global + arfcn_offset)
+        
+        return point_a_arfcn
+    
+    def arfcn_to_frequency(self, band: str, arfcn: int) -> float:
+        """
+        Convert ARFCN to frequency in MHz
+        Based on 3GPP TS 38.104 Section 5.4.2.1
+        
+        Args:
+            band: 5G NR band (e.g., 'n77')
+            arfcn: ARFCN value
+            
+        Returns:
+            Frequency in MHz
+            
+        Raises:
+            ValueError: If invalid band or ARFCN
+        """
+        band_info = get_band_info(band)
+        
+        # Formula: F_REF = F_REF_Offs + Δf_global(N_REF - N_REF_Offs) / 1000
+        # Where:
+        # - F_REF_Offs: Reference frequency offset (MHz)
+        # - Δf_global: Global frequency grid step (kHz) 
+        # - N_REF: NR-ARFCN
+        # - N_REF_Offs: ARFCN offset
+        
+        freq_ref_offset = band_info['freq_ref_offset']  # MHz
+        delta_f_global = band_info['delta_f_global']    # kHz
+        arfcn_offset = band_info['arfcn_offset']        # N_REF_Offs
+        
+        frequency = freq_ref_offset + (delta_f_global * (arfcn - arfcn_offset) / 1000.0)
+        
+        return frequency
+    
+    def get_band_info(self, band: str) -> Dict[str, Any]:
+        """
+        Get band information
+        
+        Args:
+            band: 5G NR band (e.g., 'n77')
+            
+        Returns:
+            Dictionary containing band information
+            
+        Raises:
+            ValueError: If invalid band
+        """
+        return get_band_info(band)
+    
+    # TODO: Implement SSB and GSCN related methods later
+    def calculate_ssb_candidates(self, band: str, scs_khz: int, bandwidth_mhz: int,
+                                center_arfcn: int, coreset_zero: int) -> List[Tuple[int, int]]:
+        """SSB candidate calculation - to be implemented"""
+        raise NotImplementedError("SSB candidate calculation not implemented yet")
+    
+    def arfcn_to_gscn(self, band: str, arfcn: int) -> int:
+        """ARFCN to GSCN conversion - to be implemented"""
+        raise NotImplementedError("ARFCN to GSCN conversion not implemented yet")
+    
+    def gscn_to_arfcn(self, band: str, gscn: int) -> int:
+        """GSCN to ARFCN conversion - to be implemented"""
+        raise NotImplementedError("GSCN to ARFCN conversion not implemented yet")

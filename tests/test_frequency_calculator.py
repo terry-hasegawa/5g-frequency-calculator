@@ -85,9 +85,9 @@ class TestFrequencyCalculator(unittest.TestCase):
         test_cases = [
             # (SCS, BW, Center_ARFCN, Expected_PointA_ARFCN)
             (30, 100, 650000, 646724),  # Main test case
-            (30, 50, 650000, 648362),   # 50MHz bandwidth
-            (30, 20, 650000, 649638),   # 20MHz bandwidth  
-            (15, 20, 650000, 649638),   # 15kHz SCS
+            (30, 50, 650000, 648404),   # 50MHz bandwidth
+            (30, 20, 650000, 649388),   # 20MHz bandwidth  
+            (15, 20, 650000, 649364),   # 15kHz SCS
         ]
         
         for scs_khz, bw_mhz, center_arfcn, expected_point_a in test_cases:
@@ -99,17 +99,19 @@ class TestFrequencyCalculator(unittest.TestCase):
                     center_arfcn=center_arfcn
                 )
                 
-                # Calculate expected based on formula
+                self.assertEqual(point_a_arfcn, expected_point_a,
+                               f"Point A ARFCN mismatch for SCS={scs_khz}, BW={bw_mhz}")
+                
+                # Verify frequency calculation consistency
+                point_a_freq = self.calc.arfcn_to_frequency('n77', point_a_arfcn)
+                center_freq = self.calc.arfcn_to_frequency('n77', center_arfcn)
+                
                 from src.band_data import get_max_rb
                 n_rb = get_max_rb(scs_khz, bw_mhz)
-                half_grid_khz = (n_rb * 12 * scs_khz) / 2
+                half_grid_mhz = (n_rb * 12 * scs_khz) / 2 / 1000.0
+                expected_point_a_freq = center_freq - half_grid_mhz
                 
-                center_freq = self.calc.arfcn_to_frequency('n77', center_arfcn)
-                expected_point_a_freq = center_freq - (half_grid_khz / 1000.0)
-                
-                # Verify the calculation
-                actual_point_a_freq = self.calc.arfcn_to_frequency('n77', point_a_arfcn)
-                self.assertAlmostEqual(actual_point_a_freq, expected_point_a_freq, places=2,
+                self.assertAlmostEqual(point_a_freq, expected_point_a_freq, places=2,
                                      msg=f"Point A frequency mismatch for SCS={scs_khz}, BW={bw_mhz}")
     
     def test_point_a_edge_cases(self):
