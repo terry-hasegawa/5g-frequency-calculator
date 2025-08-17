@@ -23,6 +23,117 @@ NR_BANDS = {
         'supported_scs': [15, 30],  # kHz
         'supported_bandwidths': [5, 10, 15, 20, 25, 30, 40, 50],  # MHz
     },
+    'n5': {
+        'name': 'n5',
+        'frequency_range': 'FR1',
+        'duplex_mode': 'FDD',
+        'dl_freq_low': 869.0,       # MHz
+        'dl_freq_high': 894.0,      # MHz
+        'ul_freq_low': 824.0,       # MHz
+        'ul_freq_high': 849.0,      # MHz
+        'arfcn_offset': 0,          # N_REF_Offs (0 for frequency range 0-3000 MHz)
+        'ul_arfcn_offset': 0,       # N_REF_Offs for UL
+        'freq_ref_offset': 0.0,     # F_REF_Offs (0 MHz for frequency range 0-3000 MHz)
+        'delta_f_global': 5.0,      # kHz (5 kHz for frequency range 0-3000 MHz)
+        'delta_f_raster': 100.0,    # kHz (100 kHz raster from table)
+        'supported_scs': [15, 30],  # kHz
+        'supported_bandwidths': [5, 10, 15, 20, 25, 30, 40, 50],  # MHz
+    },
+    'n7': {
+        'name': 'n7',
+        'frequency_range': 'FR1',
+        'duplex_mode': 'FDD',
+        'dl_freq_low': 2620.0,      # MHz
+        'dl_freq_high': 2690.0,     # MHz
+        'ul_freq_low': 2500.0,      # MHz
+        'ul_freq_high': 2570.0,     # MHz
+        'arfcn_offset': 0,          # N_REF_Offs (0 for frequency range 0-3000 MHz)
+        'ul_arfcn_offset': 0,       # N_REF_Offs for UL
+        'freq_ref_offset': 0.0,     # F_REF_Offs (0 MHz for frequency range 0-3000 MHz)
+        'delta_f_global': 5.0,      # kHz (5 kHz for frequency range 0-3000 MHz)
+        'delta_f_raster': 100.0,    # kHz (100 kHz raster from table)
+        'supported_scs': [15, 30],  # kHz
+        'supported_bandwidths': [5, 10, 15, 20, 25, 30, 40, 50],  # MHz
+    },
+    'n8': {
+        'name': 'n8',
+        'frequency_range': 'FR1',
+        'duplex_mode': 'FDD',
+        'dl_freq_low': 925.0,       # MHz
+        'dl_freq_high': 960.0,      # MHz
+        'ul_freq_low': 880.0,       # MHz
+        'ul_freq_high': 915.0,      # MHz
+        'arfcn_offset': 0,          # N_REF_Offs (0 for frequency range 0-3000 MHz)
+        'ul_arfcn_offset': 0,       # N_REF_Offs for UL
+        'freq_ref_offset': 0.0,     # F_REF_Offs (0 MHz for frequency range 0-3000 MHz)
+        'delta_f_global': 5.0,      # kHz (5 kHz for frequency range 0-3000 MHz)
+        'delta_f_raster': 100.0,    # kHz (100 kHz raster from table)
+        'supported_scs': [15, 30],  # kHz
+        'supported_bandwidths': [5, 10, 15, 20, 25, 30, 40, 50],  # MHz
+    },
+    'n12': {
+        'name': 'n12',
+        'frequency_range': 'FR1',
+        'duplex_mode': 'FDD',
+        'dl_freq_low': 729.0,       # MHz
+        'dl_freq_high': 746.0,      # MHz
+        'ul_freq_low': 699.0,       # MHz
+        'ul_freq_high': 716.0,      # MHz
+        'arfcn_offset': 0,          # N_REF_Offs (0 for frequency range 0-3000 MHz)
+        'ul_arfcn_offset': 0,       # N_REF_Offs for UL
+        'freq_ref_offset': 0.0,     # F_REF_Offs (0 MHz for frequency range 0-3000 MHz)
+        'delta_f_global': 5.0,      # kHz (5 kHz for frequency range 0-3000 MHz)
+        'delta_f_raster': 100.0,    # kHz (100 kHz raster from table)
+        'supported_scs': [15, 30],  # kHz
+        'supported_bandwidths': [5, 10, 15, 20, 25, 30, 40, 50],  # MHz
+    },
+    'n2': {
+        'name': 'n2',
+        'frequency_range': 'FR1',
+        'duplex_mode': 'FDD',
+        'dl_freq_low': 1930.0,      # MHz
+        'dl_freq_high': 1990.0,     # MHz
+        'ul_freq_low': 1850.0,      # MHz
+        'ul_freq_high': 1910.0,     # MHz
+        'arfcn_offset': 0,          # N_REF_Offs (0 for frequency range 0-3000 MHz)
+        'ul_arfcn_offset': 0,       # N_REF_Offs for UL
+        'freq_ref_offset': 0.0,     # F_REF_Offs (0 MHz for frequency range 0-3000 MHz)
+        'delta_f_global': 5.0,      # kHz (5 kHz for frequency range 0-3000 MHz)
+        'delta_f_raster': 100.0,    # kHz (100 kHz raster from table)
+        'supported_scs': [15, 30],  # kHz
+        'supported_bandwidths': [5, 10, 15, 20, 25, 30, 40, 50],  # MHz
+    },
+    'n3': {
+        'name': 'n3',
+        'frequency_range': 'FR1',
+        'duplex_mode': 'FDD',
+        'dl_freq_low': 1805.0,      # MHz
+        'dl_freq_high': 1880.0,     # MHz
+        'ul_freq_low': 1710.0,      # MHz
+        'ul_freq_high': 1785.0,     # MHz
+        'arfcn_offset': 0,          # N_REF_Offs (0 for frequency range 0-3000 MHz)
+        'ul_arfcn_offset': 0,       # N_REF_Offs for UL
+        'freq_ref_offset': 0.0,     # F_REF_Offs (0 MHz for frequency range 0-3000 MHz)
+        'delta_f_global': 5.0,      # kHz (5 kHz for frequency range 0-3000 MHz)
+        'delta_f_raster': 100.0,    # kHz (100 kHz raster from table)
+        'supported_scs': [15, 30],  # kHz
+        'supported_bandwidths': [5, 10, 15, 20, 25, 30, 40, 50],  # MHz
+    },
+    'n48': {
+        'name': 'n48',
+        'frequency_range': 'FR1',
+        'duplex_mode': 'TDD',
+        'dl_freq_low': 3550.0,      # MHz
+        'dl_freq_high': 3700.0,     # MHz
+        'ul_freq_low': 3550.0,      # MHz
+        'ul_freq_high': 3700.0,     # MHz
+        'arfcn_offset': 600000,     # N_REF_Offs (600000 for frequency range 3000-24250 MHz)
+        'freq_ref_offset': 3000.0,  # F_REF_Offs (3000 MHz for frequency range 3000-24250 MHz)
+        'delta_f_global': 15.0,     # kHz (15 kHz for frequency range 3000-24250 MHz)
+        'delta_f_raster': 15.0,     # kHz (15 kHz raster)
+        'supported_scs': [15, 30],  # kHz
+        'supported_bandwidths': [10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100],  # MHz
+    },
     'n77': {
         'name': 'n77',
         'frequency_range': 'FR1',

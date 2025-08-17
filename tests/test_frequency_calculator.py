@@ -221,6 +221,148 @@ class TestFrequencyCalculator(unittest.TestCase):
         self.assertEqual(band_info['delta_f_global'], 5.0)  # 5 kHz for n1
         self.assertIn('dl_freq_low', band_info)
         self.assertIn('ul_freq_low', band_info)
+    
+    def test_band_n2_fdd_calculations(self):
+        """Test Band n2 FDD calculations"""
+        
+        # Test case: n2 FDD, Bandwidth 10MHz, SCS 15kHz
+        # Center ARFCN 392000, Expected Point A: 391064
+        
+        point_a_arfcn = self.calc.calculate_point_a_arfcn(
+            band='n2',
+            scs_khz=15,
+            bandwidth_mhz=10,
+            center_arfcn=392000
+        )
+        
+        self.assertEqual(point_a_arfcn, 391064, "Point A ARFCN calculation failed for Band n2")
+        
+        # Verify Point A frequency
+        point_a_freq = self.calc.arfcn_to_frequency('n2', point_a_arfcn)
+        self.assertAlmostEqual(point_a_freq, 1955.32, places=2,
+                              msg="Point A frequency conversion failed for Band n2")
+    
+    def test_band_n3_fdd_calculations(self):
+        """Test Band n3 FDD calculations"""
+        
+        # Test case: n3 FDD, Bandwidth 10MHz, SCS 15kHz
+        # Center ARFCN 368500, Expected Point A: 367564
+        
+        point_a_arfcn = self.calc.calculate_point_a_arfcn(
+            band='n3',
+            scs_khz=15,
+            bandwidth_mhz=10,
+            center_arfcn=368500
+        )
+        
+        self.assertEqual(point_a_arfcn, 367564, "Point A ARFCN calculation failed for Band n3")
+        
+        # Verify Point A frequency
+        point_a_freq = self.calc.arfcn_to_frequency('n3', point_a_arfcn)
+        self.assertAlmostEqual(point_a_freq, 1837.82, places=2,
+                              msg="Point A frequency conversion failed for Band n3")
+    
+    def test_band_n48_tdd_calculations(self):
+        """Test Band n48 TDD calculations"""
+        
+        # Test case: n48 TDD, Bandwidth 50MHz, SCS 30kHz
+        # Center ARFCN 641668, Expected Point A: 640072
+        
+        point_a_arfcn = self.calc.calculate_point_a_arfcn(
+            band='n48',
+            scs_khz=30,
+            bandwidth_mhz=50,
+            center_arfcn=641668
+        )
+        
+        self.assertEqual(point_a_arfcn, 640072, "Point A ARFCN calculation failed for Band n48")
+        
+        # Verify Point A frequency
+        point_a_freq = self.calc.arfcn_to_frequency('n48', point_a_arfcn)
+        self.assertAlmostEqual(point_a_freq, 3601.08, places=2,
+                              msg="Point A frequency conversion failed for Band n48")
+    
+    def test_new_bands_arfcn_frequency_conversion(self):
+        """Test ARFCN to frequency conversion for new bands"""
+        
+        # Test cases for bands n2, n3, n48
+        test_cases = [
+            # Band n2
+            ('n2', 392000, 1960.0),    # Center ARFCN
+            ('n2', 391064, 1955.32),   # Point A ARFCN
+            
+            # Band n3  
+            ('n3', 368500, 1842.5),    # Center ARFCN
+            ('n3', 367564, 1837.82),   # Point A ARFCN
+            
+            # Band n48
+            ('n48', 641668, 3625.02),  # Center ARFCN
+            ('n48', 640072, 3601.08),  # Point A ARFCN
+        ]
+        
+        for band, arfcn, expected_freq in test_cases:
+            with self.subTest(band=band, arfcn=arfcn):
+                freq = self.calc.arfcn_to_frequency(band, arfcn)
+                self.assertAlmostEqual(freq, expected_freq, places=2,
+                                     msg=f"Frequency conversion failed for {band} ARFCN {arfcn}")
+    
+    def test_additional_bands_calculations(self):
+        """Test Point A calculations for additional bands (n5, n7, n8, n12)"""
+        
+        # Test cases for additional bands
+        test_cases = [
+            # (Band, SCS, BW, Center_ARFCN, Expected_PointA_ARFCN, Expected_PointA_Freq)
+            ('n5', 15, 25, 176300, 173906, 869.53),
+            ('n7', 15, 25, 531000, 528606, 2643.03),
+            ('n8', 15, 5, 188500, 188050, 940.25),
+            ('n12', 15, 15, 147500, 146078, 730.39),
+        ]
+        
+        for band, scs_khz, bw_mhz, center_arfcn, expected_point_a, expected_freq in test_cases:
+            with self.subTest(band=band, bw=bw_mhz):
+                # Test Point A calculation
+                point_a_arfcn = self.calc.calculate_point_a_arfcn(
+                    band=band,
+                    scs_khz=scs_khz,
+                    bandwidth_mhz=bw_mhz,
+                    center_arfcn=center_arfcn
+                )
+                
+                self.assertEqual(point_a_arfcn, expected_point_a,
+                               f"Point A ARFCN calculation failed for Band {band}")
+                
+                # Verify Point A frequency
+                point_a_freq = self.calc.arfcn_to_frequency(band, point_a_arfcn)
+                self.assertAlmostEqual(point_a_freq, expected_freq, places=2,
+                                      msg=f"Point A frequency conversion failed for Band {band}")
+    
+    def test_additional_bands_arfcn_frequency_conversion(self):
+        """Test ARFCN to frequency conversion for additional bands"""
+        
+        # Test cases for bands n5, n7, n8, n12
+        test_cases = [
+            # Band n5
+            ('n5', 176300, 881.5),     # Center ARFCN
+            ('n5', 173906, 869.53),    # Point A ARFCN
+            
+            # Band n7
+            ('n7', 531000, 2655.0),    # Center ARFCN
+            ('n7', 528606, 2643.03),   # Point A ARFCN
+            
+            # Band n8
+            ('n8', 188500, 942.5),     # Center ARFCN
+            ('n8', 188050, 940.25),    # Point A ARFCN
+            
+            # Band n12
+            ('n12', 147500, 737.5),    # Center ARFCN
+            ('n12', 146078, 730.39),   # Point A ARFCN
+        ]
+        
+        for band, arfcn, expected_freq in test_cases:
+            with self.subTest(band=band, arfcn=arfcn):
+                freq = self.calc.arfcn_to_frequency(band, arfcn)
+                self.assertAlmostEqual(freq, expected_freq, places=2,
+                                     msg=f"Frequency conversion failed for {band} ARFCN {arfcn}")
 
 
 if __name__ == '__main__':

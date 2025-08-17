@@ -113,16 +113,25 @@ def main():
         epilog="""
 Examples:
   # TDD Band (n77) Point A calculation
-  python -m src.cli point-a --band n77 --scs 30 --bandwidth 100 --center-arfcn 650000
+  python src/cli.py point-a --band n77 --scs 30 --bandwidth 100 --center-arfcn 650000
+  
+  # TDD Band (n48) Point A calculation
+  python src/cli.py point-a --band n48 --scs 30 --bandwidth 50 --center-arfcn 641668
   
   # FDD Band (n1) Point A calculation  
-  python -m src.cli point-a-fdd --band n1 --scs 15 --bandwidth 10 --dl-center-arfcn 432000 --ul-center-arfcn 394000
+  python src/cli.py point-a-fdd --band n1 --scs 15 --bandwidth 10 --dl-center-arfcn 432000 --ul-center-arfcn 394000
+  
+  # FDD Band (n7) Point A calculation
+  python src/cli.py point-a --band n7 --scs 15 --bandwidth 25 --center-arfcn 531000
+  
+  # FDD Band (n8) Point A calculation
+  python src/cli.py point-a --band n8 --scs 15 --bandwidth 5 --center-arfcn 188500
   
   # ARFCN to frequency conversion
-  python -m src.cli convert --band n77 --arfcn 650000
+  python src/cli.py convert --band n77 --arfcn 650000
   
   # Show band information
-  python -m src.cli band-info --band n77
+  python src/cli.py band-info --band n7
         """
     )
     
